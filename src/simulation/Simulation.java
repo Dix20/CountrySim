@@ -8,13 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.naming.ldap.StartTlsRequest;
+
 import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
 
 public class Simulation {
 	private int rundenAnzahl;
 	private boolean mitZufallsereignissen;
-	private Map<KenngroesseTyp, Kenngroesse> kenngroessen;
+	private Map<KenngroesseTyp, Kenngroesse> kenngroessen = new HashMap<>();
 	private Random random = new Random();
 	private List<Runde> runden = new ArrayList<>();
 	private List<Zufallsereignis> zufallsereignisse = new ArrayList<>();
@@ -26,6 +28,8 @@ public class Simulation {
 		// TODO FILE // KENNGRÖ?EN HINZUFÜGEN
 		simulationsdateiEinlesen(null);
 
+		setup();
+		
 		// Zufallsereignisse hinzufügen:
 		zufallsereignisse
 				.add(new Zufallsereignis("Bei einem Erdbeben kommen zahlreiche Menschen um. Bevölkerungsgröße -2", -2,
@@ -124,6 +128,7 @@ public class Simulation {
 	 * @param simulationsdatei
 	 */
 	private void simulationsdateiEinlesen(File simulationsdatei) {
+
 		// Bevölkerungsgröße
 
 		// Bevölkerungswachstum
@@ -145,8 +150,9 @@ public class Simulation {
 		// Bildung
 
 		// Staatsvermögen
-		
-		runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), new ArrayList<>()));
+
+		// runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), new
+		// ArrayList<>()));
 	}
 
 	/**
@@ -186,6 +192,7 @@ public class Simulation {
 
 	/**
 	 * Aktuelle Werte der Kennzahlen sammeln.
+	 * 
 	 * @return
 	 */
 	private Map<KenngroesseTyp, Integer> getKenngroessenMitMenge() {
@@ -194,6 +201,125 @@ public class Simulation {
 			wertDerKenngroesse.put(kt, kenngroessen.get(kt).getAktuellerWert());
 		}
 		return wertDerKenngroesse;
+	}
+
+	/**
+	 * Setzt die Anfangskenngrößen.
+	 */
+	private void setup() {
+		Map<String, Map<Integer, Integer>> einflussfaktoren = getEinflussfaktoren();
+
+		// Objecte erstellen
+		// Bevölkerungsgröße
+		Kenngroesse bevoelkerungsgroesse = new Kenngroesse(KenngroesseTyp.Bevoelkerungsgroesse, new ArrayList<>(), 1,
+				50, einflussfaktoren, 10);
+		// Bevölkerungswachstum
+		Kenngroesse bevoelkerungswachstum = new Kenngroesse(KenngroesseTyp.Bevoelkerungswachstum, new ArrayList<>(), 1,
+				30, einflussfaktoren, 10);
+		// Bevölkerungswachstumsfaktor
+		Kenngroesse bevoelkerungswachstumsfaktor = new Kenngroesse(KenngroesseTyp.Bevoelkerungswachstumsfaktor,
+				new ArrayList<>(), 1, 3, einflussfaktoren, 1);
+		// Wirtschaftsleistung
+		Kenngroesse wirtschaftsleistung = new Kenngroesse(KenngroesseTyp.Wirtschaftsleistung, new ArrayList<>(), 1, 30,
+				einflussfaktoren, 10);
+		// Modernisierungsgrad
+		Kenngroesse modernisierungsgrad = new Kenngroesse(KenngroesseTyp.Modernisierungsgrad, new ArrayList<>(), 1, 30,
+				einflussfaktoren, 10);
+		// Versorgungslage
+		Kenngroesse versorgungslage = new Kenngroesse(KenngroesseTyp.Versorgungslage, new ArrayList<>(), -4, 1,
+				einflussfaktoren, 10);
+		// Politische Stabilität
+		Kenngroesse politischeStabilitaet = new Kenngroesse(KenngroesseTyp.PolitischeStabilitaet, new ArrayList<>(),
+				-10, 50, einflussfaktoren, 10);
+		// Umweltverschmutzung
+		Kenngroesse umweltverschmutzung = new Kenngroesse(KenngroesseTyp.Umweltverschmutzung, new ArrayList<>(), 1, 30,
+				einflussfaktoren, 10);
+		// Lebensqualität
+		Kenngroesse lebensqualitaet = new Kenngroesse(KenngroesseTyp.Lebensqualitaet, new ArrayList<>(), 1, 30,
+				einflussfaktoren, 10);
+		// Bildung
+		Kenngroesse bildung = new Kenngroesse(KenngroesseTyp.Bildung, new ArrayList<>(), 1, 30, einflussfaktoren, 10);
+		// Staatsvermögen
+		Kenngroesse staatsvermoegen = new Kenngroesse(KenngroesseTyp.Staatsvermoegen, new ArrayList<>(), 1,
+				Integer.MAX_VALUE, einflussfaktoren, 10);
+
+		
+		
+		// Abhängige Kenngrößen setzen
+		// Bevölkerungsgröße
+		bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstum);
+		bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstumsfaktor);
+		
+		// Bevölkerungswachstum
+		bevoelkerungswachstum.getKenngroessenMitEinfluss().add(bildung);
+		bevoelkerungswachstum.getKenngroessenMitEinfluss().add(lebensqualitaet);
+		
+		// Bevölkerungswachstumsfaktor
+		bevoelkerungswachstumsfaktor.getKenngroessenMitEinfluss().add(bevoelkerungsgroesse);
+
+		// Wirtschaftsleistung
+		wirtschaftsleistung.getKenngroessenMitEinfluss().add(wirtschaftsleistung);
+
+		// Modernisierungsgrad
+		modernisierungsgrad.getKenngroessenMitEinfluss().add(modernisierungsgrad);
+
+		// Versorgungslage
+		versorgungslage.getKenngroessenMitEinfluss().add(wirtschaftsleistung);
+
+		// Politische Stabilität
+		politischeStabilitaet.getKenngroessenMitEinfluss().add(lebensqualitaet);
+		
+		// Umweltverschmutzung
+		umweltverschmutzung.getKenngroessenMitEinfluss().add(wirtschaftsleistung);
+		umweltverschmutzung.getKenngroessenMitEinfluss().add(modernisierungsgrad);
+		umweltverschmutzung.getKenngroessenMitEinfluss().add(umweltverschmutzung);
+		
+		// Lebensqualität
+		lebensqualitaet.getKenngroessenMitEinfluss().add(umweltverschmutzung);
+		lebensqualitaet.getKenngroessenMitEinfluss().add(bildung);
+		lebensqualitaet.getKenngroessenMitEinfluss().add(bevoelkerungsgroesse);
+		lebensqualitaet.getKenngroessenMitEinfluss().add(lebensqualitaet);
+		
+		// Bildung
+		bildung.getKenngroessenMitEinfluss().add(bildung);
+
+		// Staatsvermögen
+		staatsvermoegen.getKenngroessenMitEinfluss().add(bevoelkerungsgroesse);
+		staatsvermoegen.getKenngroessenMitEinfluss().add(wirtschaftsleistung);
+		staatsvermoegen.getKenngroessenMitEinfluss().add(versorgungslage);
+		staatsvermoegen.getKenngroessenMitEinfluss().add(politischeStabilitaet);
+		staatsvermoegen.getKenngroessenMitEinfluss().add(lebensqualitaet);
+		
+		
+		// Kenngrößen der Simulation hinzufügen
+		// Bevölkerungsgröße
+		kenngroessen.put(KenngroesseTyp.Bevoelkerungsgroesse, bevoelkerungsgroesse);
+		// Bevölkerungswachstum
+		kenngroessen.put(KenngroesseTyp.Bevoelkerungswachstum, bevoelkerungswachstum);
+		// Bevölkerungswachstumsfaktor
+		kenngroessen.put(KenngroesseTyp.Bevoelkerungswachstumsfaktor, bevoelkerungswachstumsfaktor);
+		// Wirtschaftsleistung
+		kenngroessen.put(KenngroesseTyp.Wirtschaftsleistung, wirtschaftsleistung);
+		// Modernisierungsgrad
+		kenngroessen.put(KenngroesseTyp.Modernisierungsgrad, modernisierungsgrad);
+		// Versorgungslage
+		kenngroessen.put(KenngroesseTyp.Versorgungslage, versorgungslage);
+		// Politische Stabilität
+		kenngroessen.put(KenngroesseTyp.PolitischeStabilitaet, politischeStabilitaet);
+		// Umweltverschmutzung
+		kenngroessen.put(KenngroesseTyp.Umweltverschmutzung, umweltverschmutzung);
+		// Lebensqualität
+		kenngroessen.put(KenngroesseTyp.Lebensqualitaet, lebensqualitaet);
+		// Bildung
+		kenngroessen.put(KenngroesseTyp.Bildung, bildung);
+		// Staatsvermögen
+		kenngroessen.put(KenngroesseTyp.Staatsvermoegen, staatsvermoegen);
+	}
+
+	private Map<String, Map<Integer, Integer>> getEinflussfaktoren() {
+		Map<String, Map<Integer, Integer>> einflussfaktoren = new HashMap<>();
+		// TODO
+		return einflussfaktoren;
 	}
 
 	public int getRundenAnzahl() {
