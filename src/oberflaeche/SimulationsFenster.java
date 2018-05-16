@@ -16,7 +16,7 @@ import simulation.Simulation;
 
 public class SimulationsFenster {
 	private JFrame frame = new JFrame();
-	private Simulation simulation = new Simulation(10, true);
+	private Simulation simulation = new Simulation("C:\\Users\\bendi\\Documents\\Uni\\CountrySim\\Simulationsdatei.sim");
 
 	private JLabel staatsvermoegen;
 	private JLabel wirtschaftsleistung;
@@ -25,15 +25,21 @@ public class SimulationsFenster {
 	private JLabel bildung;
 	private JLabel runde;
 
-	public void start() {
+	public SimulationsFenster() {
 		// Fenster erstellen
+	}
+
+	public void start() {
+		// Alle Elemente löschen
+		frame = new JFrame();
 		frame.setSize(1500, 800);
 		frame.setResizable(false);
 		frame.setLayout(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().removeAll();
 
 		// Anzeige der aktuellen Runde
-		runde = new JLabel("Runde: " + (simulation.getRunden().size() + 1));
+		runde = new JLabel("Runde: " + (simulation.getRunden().size()));
 		runde.setBounds(5, 5, 200, 20);
 		frame.add(runde);
 
@@ -50,6 +56,7 @@ public class SimulationsFenster {
 						Integer.parseInt(modernisierungsgrad.getText().split(" ")[1]),
 						Integer.parseInt(lebensqualitaet.getText().split(" ")[1]),
 						Integer.parseInt(bildung.getText().split(" ")[1]));
+				start();
 			}
 		});
 		btn.setBounds(1200, 300, 200, 100);

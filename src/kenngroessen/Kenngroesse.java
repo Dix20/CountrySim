@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Repräsentiert eine beliebige Kenngröße.
+ * 
+ * @author Flo
+ * @author Fynn
+ * @author Jan
+ */
 public class Kenngroesse {
 	private KenngroesseTyp kenngroesseTyp;
 	private List<Kenngroesse> kenngroessenMitEinfluss = new ArrayList<>();
@@ -26,9 +33,26 @@ public class Kenngroesse {
 	 * Aktuallisiert 'aktuellerWert' aufgrund der kenngroessen mit Einfluss.
 	 */
 	public void aktuallisiereWert() {
-		for (Kenngroesse k : kenngroessenMitEinfluss) {
-			aktuellerWert += einflussfaktoren.get(this.kenngroesseTyp.toString() + k.getKenngroesseTyp().toString())
-					.get(k.getAktuellerWert());
+		if (this.kenngroesseTyp.equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
+				|| this.kenngroesseTyp.equals(KenngroesseTyp.Versorgungslage)) {
+			// Setzt die Werte aus den Einflussfaktoren direkt.
+			aktuellerWert = einflussfaktoren.get(kenngroessenMitEinfluss.get(0).getKenngroesseTyp().toString() + "auf"
+					+ this.kenngroesseTyp.toString()).get(kenngroessenMitEinfluss.get(0).getAktuellerWert());
+		} else {
+			// Addiert die Werte der Einflussfaktoren aller einflussnehmender Kenngrößen
+			for (Kenngroesse k : kenngroessenMitEinfluss) {
+				int faktor = 0;
+				if (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
+						|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
+					faktor = k.getAktuellerWert();
+				} else {
+					faktor = einflussfaktoren
+							.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
+							.get(k.getAktuellerWert());
+				}
+
+				aktuellerWert += faktor;
+			}
 		}
 	}
 
