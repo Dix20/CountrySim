@@ -12,11 +12,11 @@ import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
 
 public class Setup {
+	public static String einflussfaktorenPath;
 
 	public static List<Kenngroesse> getAllKenngroessen() {
 		List<Kenngroesse> kenngroessen = new ArrayList<>();
-		Map<String, Map<Integer, Integer>> einflussfaktoren = getEinflussfaktoren(
-				"C:\\Users\\bendi\\Documents\\Uni\\CountrySim\\Einflussfaktoren.csv");
+		Map<String, Map<Integer, Integer>> einflussfaktoren = getEinflussfaktoren(einflussfaktorenPath);
 
 		// Objekte erstellen
 		// Bevölkerungsgröße
@@ -24,7 +24,7 @@ public class Setup {
 				50, einflussfaktoren, 10);
 		// Bevölkerungswachstum
 		Kenngroesse bevoelkerungswachstum = new Kenngroesse(KenngroesseTyp.Bevoelkerungswachstum, new ArrayList<>(), 1,
-				30, einflussfaktoren, 10);
+				30, einflussfaktoren, 1);
 		// Bevölkerungswachstumsfaktor
 		Kenngroesse bevoelkerungswachstumsfaktor = new Kenngroesse(KenngroesseTyp.Bevoelkerungswachstumsfaktor,
 				new ArrayList<>(), 1, 3, einflussfaktoren, 1);
@@ -36,7 +36,7 @@ public class Setup {
 				einflussfaktoren, 10);
 		// Versorgungslage
 		Kenngroesse versorgungslage = new Kenngroesse(KenngroesseTyp.Versorgungslage, new ArrayList<>(), -4, 1,
-				einflussfaktoren, 10);
+				einflussfaktoren, 0);
 		// Politische Stabilität
 		Kenngroesse politischeStabilitaet = new Kenngroesse(KenngroesseTyp.PolitischeStabilitaet, new ArrayList<>(),
 				-10, 50, einflussfaktoren, 10);
@@ -49,7 +49,7 @@ public class Setup {
 		// Bildung
 		Kenngroesse bildung = new Kenngroesse(KenngroesseTyp.Bildung, new ArrayList<>(), 1, 30, einflussfaktoren, 10);
 		// Staatsvermögen
-		Kenngroesse staatsvermoegen = new Kenngroesse(KenngroesseTyp.Staatsvermoegen, new ArrayList<>(), 1,
+		Kenngroesse staatsvermoegen = new Kenngroesse(KenngroesseTyp.Staatsvermoegen, new ArrayList<>(), 0,
 				Integer.MAX_VALUE, einflussfaktoren, 10);
 
 		// Abhängige Kenngrößen setzen
@@ -120,7 +120,7 @@ public class Setup {
 		kenngroessen.add(bildung);
 		// Staatsvermögen
 		kenngroessen.add(staatsvermoegen);
-		
+
 		return kenngroessen;
 	}
 
@@ -169,29 +169,17 @@ public class Setup {
 		return einflussfaktoren;
 	}
 
-//	private static void hhh() {
-//		Map<String, Map<Integer, Integer>> x = getEinflussfaktoren(
-//				"C:\\Users\\bendi\\Documents\\Uni\\Einflussfaktoren.csv");
-//
-//		for (String y : x.keySet()) {
-//			System.out.println("NAME: " + y);
-//			for (Integer i : x.get(y).keySet()) {
-//				System.out.println("WertBERIECH: " + i);
-//				System.out.println("WERT: " + x.get(y).get(i));
-//			}
-//		}
-//	}
-//	
-//	public static void main(String[] args) {
-//		Map<String, Map<Integer, Integer>> x = getEinflussfaktoren(
-//				"C:\\Users\\bendi\\Documents\\Uni\\Einflussfaktoren.csv");
-//
-//		for (String y : x.keySet()) {
-//			System.out.println("NAME: " + y);
-//			for (Integer i : x.get(y).keySet()) {
-//				System.out.println("WertBERIECH: " + i);
-//				System.out.println("WERT: " + x.get(y).get(i));
-//			}
-//		}
-//	}
+	public static List<Zufallsereignis> getAllZufallsereignisse() {
+		List<Zufallsereignis> zufallsereignisse = new ArrayList<>();
+
+		// Zufallsereignisse der Liste hinzufügen
+		zufallsereignisse
+				.add(new Zufallsereignis("Bei einem Erdbeben kommen zahlreiche Menschen um. Bevölkerungsgröße -2", -2,
+						KenngroesseTyp.Bevoelkerungsgroesse));
+
+		zufallsereignisse
+				.add(new Zufallsereignis("HSV steigt ab... Lebensqualitaet -2", -2, KenngroesseTyp.Lebensqualitaet));
+
+		return zufallsereignisse;
+	}
 }

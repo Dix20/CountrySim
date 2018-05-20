@@ -39,9 +39,7 @@ public class Simulation {
 		simulationsdateiEinlesen(simulationsdateiPath);
 
 		// Zufallsereignisse hinzufügen:
-		zufallsereignisse
-				.add(new Zufallsereignis("Bei einem Erdbeben kommen zahlreiche Menschen um. Bevölkerungsgröße -2", -2,
-						KenngroesseTyp.Bevoelkerungsgroesse));
+		zufallsereignisse = Setup.getAllZufallsereignisse();
 	}
 
 	/**
@@ -119,9 +117,7 @@ public class Simulation {
 		}
 
 		// Neue Runde hinzufügen
-		System.out.println(runden.size());
 		runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), verwendeteZufallsereignisse));
-		System.out.println(runden.size());
 	}
 
 	/**
@@ -147,7 +143,7 @@ public class Simulation {
 								ausgangslage = false;
 								continue;
 							}
-							
+
 							// KenngroesseTyp und Startwert herausfinden
 							String typ = infos[0];
 							String wert = infos[2];
@@ -177,6 +173,8 @@ public class Simulation {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			kenngroessen.get(KenngroesseTyp.Versorgungslage).aktuallisiereWert(1);
+			kenngroessen.get(KenngroesseTyp.Bevoelkerungswachstumsfaktor).aktuallisiereWert(1);
 
 			runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), new ArrayList<>()));
 		} else {
@@ -199,7 +197,7 @@ public class Simulation {
 	 * @return
 	 */
 	public boolean isSimulationErfolgreich() {
-		return rundenAnzahl == runden.size();
+		return rundenAnzahl <= runden.size();
 	}
 
 	/**
@@ -208,6 +206,9 @@ public class Simulation {
 	 * @return
 	 */
 	public boolean isSimulationFehlgeschlagen() {
+		kenngroessen.values()
+				.forEach(k -> System.out.println(k.getKenngroesseTyp().toString() + " AKTUELL: " + k.getAktuellerWert()
+						+ " ENDE: " + k.getWertebereichEnde() + " ANFANG: " + k.getWertebereichAnfang()));
 		return kenngroessen.values().stream().anyMatch(k -> k.getAktuellerWert() > k.getWertebereichEnde()
 				|| k.getAktuellerWert() < k.getWertebereichAnfang());
 	}
@@ -216,17 +217,19 @@ public class Simulation {
 	 * Aktuallsieirt alle in dieser Simulation gespeicherten Kenngroessen
 	 */
 	private void kenngroessenAktuallisieren() {
-		kenngroessen.get(KenngroesseTyp.Wirtschaftsleistung).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Versorgungslage).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Modernisierungsgrad).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Bildung).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Umweltverschmutzung).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Lebensqualitaet).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Bevoelkerungswachstum).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Bevoelkerungswachstumsfaktor).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Bevoelkerungsgroesse).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.PolitischeStabilitaet).aktuallisiereWert();
-		kenngroessen.get(KenngroesseTyp.Staatsvermoegen).aktuallisiereWert();
+		kenngroessen.get(KenngroesseTyp.Wirtschaftsleistung).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Versorgungslage).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Modernisierungsgrad).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Bildung).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Umweltverschmutzung).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Lebensqualitaet).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Bevoelkerungswachstum).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Bevoelkerungswachstumsfaktor).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Bevoelkerungsgroesse)
+				.aktuallisiereWert(kenngroessen.get(KenngroesseTyp.Bevoelkerungswachstumsfaktor).getAktuellerWert());
+		kenngroessen.get(KenngroesseTyp.PolitischeStabilitaet).aktuallisiereWert(1);
+		kenngroessen.get(KenngroesseTyp.Staatsvermoegen)
+				.aktuallisiereWert(kenngroessen.get(KenngroesseTyp.Versorgungslage).getAktuellerWert());
 	}
 
 	/**

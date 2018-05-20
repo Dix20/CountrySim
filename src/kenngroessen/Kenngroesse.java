@@ -32,7 +32,13 @@ public class Kenngroesse {
 	/**
 	 * Aktuallisiert 'aktuellerWert' aufgrund der kenngroessen mit Einfluss.
 	 */
-	public void aktuallisiereWert() {
+	public void aktuallisiereWert(int multiplikatorFaktor) {
+		if (aktuellerWert > wertebereichEnde || aktuellerWert < wertebereichAnfang) {
+			// Wenn der aktuelle Wert schon ausserhalbe des Wertebereiches ist, wird die
+			// Aktuallisierung abgebrochen
+			return;
+		}
+
 		if (this.kenngroesseTyp.equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
 				|| this.kenngroesseTyp.equals(KenngroesseTyp.Versorgungslage)) {
 			// Setzt die Werte aus den Einflussfaktoren direkt.
@@ -41,14 +47,27 @@ public class Kenngroesse {
 		} else {
 			// Addiert die Werte der Einflussfaktoren aller einflussnehmender Kenngrößen
 			for (Kenngroesse k : kenngroessenMitEinfluss) {
+				if (aktuellerWert > wertebereichEnde || aktuellerWert < wertebereichAnfang) {
+					// Wenn der aktuelle Wert schon ausserhalbe des Wertebereiches ist, wird die
+					// Aktuallisierung abgebrochen
+					return;
+				}
+
 				int faktor = 0;
 				if (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
 						|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
 					faktor = k.getAktuellerWert();
 				} else {
+					System.out.println(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString() + ".. "
+							+ k.getAktuellerWert());
 					faktor = einflussfaktoren
 							.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
 							.get(k.getAktuellerWert());
+
+					if (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
+							|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
+						faktor *= multiplikatorFaktor;
+					}
 				}
 
 				aktuellerWert += faktor;

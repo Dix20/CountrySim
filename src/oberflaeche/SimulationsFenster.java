@@ -7,16 +7,21 @@ import java.awt.font.TextAttribute;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
+import simulation.Setup;
 import simulation.Simulation;
+import simulation.Zufallsereignis;
 
 public class SimulationsFenster {
 	private JFrame frame = new JFrame();
-	private Simulation simulation = new Simulation("C:\\Users\\bendi\\Documents\\Uni\\CountrySim\\Simulationsdatei.sim");
+	private Simulation simulation;
 
 	private JLabel staatsvermoegen;
 	private JLabel wirtschaftsleistung;
@@ -30,6 +35,24 @@ public class SimulationsFenster {
 	}
 
 	public void start() {
+		// Filechooser Einflussfaktoren
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.showOpenDialog(null);
+		String einflussfaktorenPath = fileChooser.getSelectedFile().getPath();
+		System.out.println(fileChooser.getSelectedFile().getPath());
+		Setup.einflussfaktorenPath = einflussfaktorenPath;
+
+		// Filechooser Semulationsdatei
+		fileChooser.showOpenDialog(null);
+		String simulationsdateiPath = fileChooser.getSelectedFile().getPath();
+
+		// Simulation erstellen
+		simulation = new Simulation(simulationsdateiPath);
+
+		neueRundeSetzen();
+	}
+
+	private void neueRundeSetzen() {
 		// Alle Elemente löschen
 		frame = new JFrame();
 		frame.setSize(1500, 800);
@@ -46,6 +69,26 @@ public class SimulationsFenster {
 		aktuellenStandSetzen();
 
 		anpassungSetzen();
+		
+		if (simulation.isSimulationErfolgreich()) {
+			System.out.println("ERFOLGT");
+			// Simulation Erfolgreich
+			JLabel erfolgreichLabel = new JLabel("Gewonnen!");
+			erfolgreichLabel.setBounds(100, 100, 200, 200);
+			frame.add(erfolgreichLabel);
+			// Frame anzeigen
+			frame.setVisible(true);
+			return;
+		} else if (simulation.isSimulationFehlgeschlagen()) {
+			System.out.println("NIHCHRT");
+			// Simulation Fehlgeschlagen
+			JLabel fehlgeschlagenLabel = new JLabel("Verloren...");
+			fehlgeschlagenLabel.setBounds(100, 100, 200, 200);
+			frame.add(fehlgeschlagenLabel);
+			// Frame anzeigen
+			frame.setVisible(true);
+			return;
+		}
 
 		// nächste Runde Button
 		JButton btn = new JButton("Nächste Runde");
@@ -56,7 +99,18 @@ public class SimulationsFenster {
 						Integer.parseInt(modernisierungsgrad.getText().split(" ")[1]),
 						Integer.parseInt(lebensqualitaet.getText().split(" ")[1]),
 						Integer.parseInt(bildung.getText().split(" ")[1]));
-				start();
+				// Dialog mit den Zufallsereignissen anzeigen:
+				if (simulation.isMitZufallsereignissen()) {
+					String zufallsereignisseString = "Folgende Zufallsereignisse sind letzte Runde eingetreten:\n";
+					for (Zufallsereignis z : simulation.getRunden().get(simulation.getRunden().size() - 1)
+							.getZufallsereignisse()) {
+						zufallsereignisseString += z.getBeschreibung() + "\n";
+					}
+					JOptionPane.showMessageDialog(null, zufallsereignisseString);
+				}
+
+				// Fenster akuallisieren
+				neueRundeSetzen();
 			}
 		});
 		btn.setBounds(1200, 300, 200, 100);
@@ -67,6 +121,7 @@ public class SimulationsFenster {
 	}
 
 	private void aktuellenStandSetzen() {
+		// Überschriften setzen
 		JLabel ueberschrift = new JLabel("Aktueller Stand:");
 		ueberschrift.setBounds(100, 50, 250, 50);
 		ueberschrift.setFont(new Font(ueberschrift.getFont().getFontName(), Font.BOLD, 25));
@@ -88,6 +143,7 @@ public class SimulationsFenster {
 	}
 
 	private void anpassungSetzen() {
+		// Überschrift
 		JLabel ueberschrift = new JLabel("Neue Werte:");
 		ueberschrift.setBounds(600, 50, 250, 50);
 		ueberschrift.setFont(new Font(ueberschrift.getFont().getFontName(), Font.BOLD, 25));
@@ -98,10 +154,12 @@ public class SimulationsFenster {
 		frame.add(ueberschrift);
 
 		// Aufteilung neu anpassen
+		// Staatsvermögen
 		staatsvermoegen = new JLabel("Staatsvermögen: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Staatsvermoegen).getAktuellerWert());
 		staatsvermoegen.setFont(new Font(staatsvermoegen.getFont().getFontName(), Font.PLAIN, 20));
 		staatsvermoegen.setBounds(600, 100, 250, 50);
+		// Wirtschaftsleistung
 		wirtschaftsleistung = new JLabel("Wirtschaftsleistung: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Wirtschaftsleistung).getAktuellerWert());
 		wirtschaftsleistung.setFont(new Font(wirtschaftsleistung.getFont().getFontName(), Font.PLAIN, 20));
@@ -133,6 +191,7 @@ public class SimulationsFenster {
 			}
 		});
 		wirtschaftsleistungEntfernen.setBounds(925, 200, 50, 50);
+		// Modernisierungsgrad
 		modernisierungsgrad = new JLabel("Modernisierungsgrad: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Modernisierungsgrad).getAktuellerWert());
 		modernisierungsgrad.setFont(new Font(modernisierungsgrad.getFont().getFontName(), Font.PLAIN, 20));
@@ -151,6 +210,7 @@ public class SimulationsFenster {
 			}
 		});
 		modernisierungsgradHinzufuegen.setBounds(900, 300, 50, 50);
+		// Lebensqualität
 		lebensqualitaet = new JLabel("Lebensqualität: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Lebensqualitaet).getAktuellerWert());
 		lebensqualitaet.setFont(new Font(lebensqualitaet.getFont().getFontName(), Font.PLAIN, 20));
@@ -169,6 +229,7 @@ public class SimulationsFenster {
 			}
 		});
 		lebensqualitaetHinzufuegen.setBounds(900, 400, 50, 50);
+		// Bildung
 		bildung = new JLabel("Bildung: " + simulation.getKenngroessen().get(KenngroesseTyp.Bildung).getAktuellerWert());
 		bildung.setFont(new Font(bildung.getFont().getFontName(), Font.PLAIN, 20));
 		bildung.setBounds(600, 500, 250, 50);
