@@ -187,8 +187,22 @@ public class Simulation {
 	 * 
 	 * @param simulationsinfodateiPath
 	 */
-	public void simulationsionsdateiErstellen(Path simulationsionsdateiPath) {
-
+	public void simulationsionsdateiErstellen(String simulationsionsdateiPath) {
+		String text = "";
+		
+		// Überschrift, welche das Ergebnis der Simulation beschreibt.
+		if(isSimulationErfolgreich()) {
+			text += "Simulation war Erfolgreich\n";
+		} else if(isSimulationFehlgeschlagen()) {
+			text += "Simulation ist Fehlgeschlagen...\n";
+		} else {
+			text += "Simulation wurde noch nicht beendet.\n";
+		}
+		
+		// Beschreibung jeder Runde
+		for(Runde r : runden) {
+			text += r.getInfos() +"\n";
+		}
 	}
 
 	/**

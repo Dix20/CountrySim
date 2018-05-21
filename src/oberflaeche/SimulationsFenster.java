@@ -29,6 +29,7 @@ public class SimulationsFenster {
 	private JLabel lebensqualitaet;
 	private JLabel bildung;
 	private JLabel runde;
+	private JFileChooser fileChooser = new JFileChooser();
 
 	public SimulationsFenster() {
 		// Fenster erstellen
@@ -36,10 +37,8 @@ public class SimulationsFenster {
 
 	public void start() {
 		// Filechooser Einflussfaktoren
-		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.showOpenDialog(null);
 		String einflussfaktorenPath = fileChooser.getSelectedFile().getPath();
-		System.out.println(fileChooser.getSelectedFile().getPath());
 		Setup.einflussfaktorenPath = einflussfaktorenPath;
 
 		// Filechooser Semulationsdatei
@@ -69,24 +68,18 @@ public class SimulationsFenster {
 		aktuellenStandSetzen();
 
 		anpassungSetzen();
-		
+
 		if (simulation.isSimulationErfolgreich()) {
-			System.out.println("ERFOLGT");
-			// Simulation Erfolgreich
-			JLabel erfolgreichLabel = new JLabel("Gewonnen!");
-			erfolgreichLabel.setBounds(100, 100, 200, 200);
-			frame.add(erfolgreichLabel);
-			// Frame anzeigen
 			frame.setVisible(true);
+			// Simulation Erfolgreich
+			JOptionPane.showMessageDialog(null, "Simulation Erfolgreich!");
+			simulationsdateiErstellen();
 			return;
 		} else if (simulation.isSimulationFehlgeschlagen()) {
-			System.out.println("NIHCHRT");
 			// Simulation Fehlgeschlagen
-			JLabel fehlgeschlagenLabel = new JLabel("Verloren...");
-			fehlgeschlagenLabel.setBounds(100, 100, 200, 200);
-			frame.add(fehlgeschlagenLabel);
-			// Frame anzeigen
 			frame.setVisible(true);
+			JOptionPane.showMessageDialog(null, "Simulation fehlgeschlagen...");
+			simulationsdateiErstellen();
 			return;
 		}
 
@@ -257,5 +250,20 @@ public class SimulationsFenster {
 		frame.add(lebensqualitaetHinzufuegen);
 		frame.add(bildung);
 		frame.add(bildungHinzufuegen);
+	}
+
+	private void simulationsdateiErstellen() {
+		int dateiErstellen = JOptionPane.showOptionDialog(null,
+				"Möchten Sie eine Ergebnisdatei von der Simulation erstellen?", "", JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, null, null);
+
+		if (dateiErstellen == 0) {
+			// Die Datei soll erstellt werden
+			fileChooser.showOpenDialog(null);
+			simulation.simulationsionsdateiErstellen(fileChooser.getSelectedFile().getPath());
+		} else if (dateiErstellen == 1) {
+			// Die Datei soll nicht erstellt werden
+
+		}
 	}
 }
