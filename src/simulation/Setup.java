@@ -11,11 +11,27 @@ import java.util.Map;
 import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
 
+/**
+ * Diese Klasse stellt Methoden zur verfügung um
+ * bestimmte Objekte zu erhalten.
+ * 
+ * @author Flo
+ * @author Fynn
+ * @author Jan
+ */
 public class Setup {
 	public static String einflussfaktorenPath;
 
-	public static List<Kenngroesse> getAllKenngroessen() {
-		List<Kenngroesse> kenngroessen = new ArrayList<>();
+	/**
+	 * Erstellt eine Map, welche für jeden KenngroesseTyp genau eine Kenngröße
+	 * speichert. Liest zusätzlich die Einflussfaktoren ein, welche im
+	 * 'einflussfaktorenPath' gespeichert sind. Diese werden den Kenngrößen
+	 * mitübergeben.
+	 * 
+	 * @return
+	 */
+	public static Map<KenngroesseTyp, Kenngroesse> getAllKenngroessen() {
+		Map<KenngroesseTyp, Kenngroesse> kenngroessen = new HashMap<>();
 		Map<String, Map<Integer, Integer>> einflussfaktoren = getEinflussfaktoren(einflussfaktorenPath);
 
 		// Objekte erstellen
@@ -99,27 +115,27 @@ public class Setup {
 
 		// KENNGROESSEN HINZUFUEGEN
 		// Bevölkerungsgröße
-		kenngroessen.add(bevoelkerungsgroesse);
+		kenngroessen.put(KenngroesseTyp.Bevoelkerungsgroesse, bevoelkerungsgroesse);
 		// Bevölkerungswachstum
-		kenngroessen.add(bevoelkerungswachstum);
+		kenngroessen.put(KenngroesseTyp.Bevoelkerungswachstum, bevoelkerungswachstum);
 		// Bevölkerungswachstumsfaktor
-		kenngroessen.add(bevoelkerungswachstumsfaktor);
+		kenngroessen.put(KenngroesseTyp.Bevoelkerungswachstumsfaktor, bevoelkerungswachstumsfaktor);
 		// Wirtschaftsleistung
-		kenngroessen.add(wirtschaftsleistung);
+		kenngroessen.put(KenngroesseTyp.Wirtschaftsleistung, wirtschaftsleistung);
 		// Modernisierungsgrad
-		kenngroessen.add(modernisierungsgrad);
+		kenngroessen.put(KenngroesseTyp.Modernisierungsgrad, modernisierungsgrad);
 		// Versorgungslage
-		kenngroessen.add(versorgungslage);
+		kenngroessen.put(KenngroesseTyp.Versorgungslage, versorgungslage);
 		// Politische Stabilität
-		kenngroessen.add(politischeStabilitaet);
+		kenngroessen.put(KenngroesseTyp.PolitischeStabilitaet, politischeStabilitaet);
 		// Umweltverschmutzung
-		kenngroessen.add(umweltverschmutzung);
+		kenngroessen.put(KenngroesseTyp.Umweltverschmutzung, umweltverschmutzung);
 		// Lebensqualität
-		kenngroessen.add(lebensqualitaet);
+		kenngroessen.put(KenngroesseTyp.Lebensqualitaet, lebensqualitaet);
 		// Bildung
-		kenngroessen.add(bildung);
+		kenngroessen.put(KenngroesseTyp.Bildung, bildung);
 		// Staatsvermögen
-		kenngroessen.add(staatsvermoegen);
+		kenngroessen.put(KenngroesseTyp.Staatsvermoegen, staatsvermoegen);
 
 		return kenngroessen;
 	}
@@ -141,8 +157,9 @@ public class Setup {
 			while ((line = br.readLine()) != null) {
 				allLines.add(line.split(";"));
 			}
+			br.close();
 		} catch (IOException e) {
-			System.out.println("Func '" + "" + "' failed: " + e);
+			System.err.println("Func '" + "" + "' failed: " + e);
 		}
 
 		// Daten in einflussfaktoren formatieren
@@ -169,6 +186,11 @@ public class Setup {
 		return einflussfaktoren;
 	}
 
+	/**
+	 * Erstellt eine Liste mit Zufallsereignissen und gibt diese zurück.
+	 * 
+	 * @return
+	 */
 	public static List<Zufallsereignis> getAllZufallsereignisse() {
 		List<Zufallsereignis> zufallsereignisse = new ArrayList<>();
 

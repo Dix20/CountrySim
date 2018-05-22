@@ -1,24 +1,29 @@
 package simulation;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Scanner;
 
 import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
 
+/**
+ * Diese Klasse repräsentiert eine Simulation.
+ * 
+ * @author Flo
+ * @author Fynn
+ * @author Jan
+ */
 public class Simulation {
 	private int rundenAnzahl;
 	private boolean mitZufallsereignissen;
@@ -28,13 +33,8 @@ public class Simulation {
 	private List<Zufallsereignis> zufallsereignisse = new ArrayList<>();
 
 	public Simulation(String simulationsdateiPath) {
-		this.rundenAnzahl = rundenAnzahl;
-		this.mitZufallsereignissen = mitZufallsereignissen;
-
 		// Kenngrößen hinzufügen
-		for (Kenngroesse k : Setup.getAllKenngroessen()) {
-			kenngroessen.put(k.getKenngroesseTyp(), k);
-		}
+		kenngroessen = Setup.getAllKenngroessen();
 
 		simulationsdateiEinlesen(simulationsdateiPath);
 
@@ -55,6 +55,11 @@ public class Simulation {
 	 */
 	public void neueRunde(int staatsvermoegen, int wirtschaftsleistung, int modernisierungsgrad, int lebensqualitaet,
 			int bildung) {
+		// Überprüfen, ob die Simulation schon beendet wurde
+		if (isSimulationFehlgeschlagen() || isSimulationErfolgreich()) {
+			System.err.println("Die Simulation ist bereits beendet. Es kann keine neue Runde simuliert werden.");
+			return;
+		}
 		// Überprüfen, ob die Übergebenen Daten korrekt sind.
 		int verwendeteWerte = ((wirtschaftsleistung
 				- kenngroessen.get(KenngroesseTyp.Wirtschaftsleistung).getAktuellerWert())
@@ -117,7 +122,7 @@ public class Simulation {
 		}
 
 		// Neue Runde hinzufügen
-		runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), verwendeteZufallsereignisse));
+		runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), verwendeteZufallsereignisse, this));
 	}
 
 	/**
@@ -135,7 +140,6 @@ public class Simulation {
 				boolean ausgangslage = false;
 				while ((line = br.readLine()) != null) {
 					if (!line.equals("")) {
-						System.out.println(line);
 						String[] infos = line.split(" ");
 						if (ausgangslage) {
 							// Überprüfen, ob die Daten der Ausgagngslage fertig sind.
@@ -170,13 +174,14 @@ public class Simulation {
 						}
 					}
 				}
+				br.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			kenngroessen.get(KenngroesseTyp.Versorgungslage).aktuallisiereWert(1);
 			kenngroessen.get(KenngroesseTyp.Bevoelkerungswachstumsfaktor).aktuallisiereWert(1);
 
-			runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), new ArrayList<>()));
+			runden.add(new Runde(runden.size(), getKenngroessenMitMenge(), new ArrayList<>(), this));
 		} else {
 			System.err.println("Die Simulationsdatei muss die Endung '.sim' haben.");
 		}
@@ -187,21 +192,42 @@ public class Simulation {
 	 * 
 	 * @param simulationsinfodateiPath
 	 */
-	public void simulationsionsdateiErstellen(String simulationsionsdateiPath) {
+	public void simulationsionsinfosErstellen(String simulationsionsdateiPath) {
+		if (!simulationsionsdateiPath.endsWith(".res")) {
+			simulationsionsdateiPath += ".res";
+		}
+
 		String text = "";
-		
+
 		// Überschrift, welche das Ergebnis der Simulation beschreibt.
-		if(isSimulationErfolgreich()) {
+		if (isSimulationErfolgreich()) {
 			text += "Simulation war Erfolgreich\n";
-		} else if(isSimulationFehlgeschlagen()) {
+		} else if (isSimulationFehlgeschlagen()) {
 			text += "Simulation ist Fehlgeschlagen...\n";
 		} else {
 			text += "Simulation wurde noch nicht beendet.\n";
 		}
-		
+
 		// Beschreibung jeder Runde
-		for(Runde r : runden) {
-			text += r.getInfos() +"\n";
+		for (Runde r : runden) {
+			text += r.getInfos() + "\n";
+		}
+
+		// Datei erstellen und speichern
+		BufferedWriter writer = null;
+		try {
+			// create a temporary file
+			File logFile = new File(simulationsionsdateiPath);
+			writer = new BufferedWriter(new FileWriter(logFile));
+			writer.write(text);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				// Close the writer regardless of what happens...
+				writer.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 
@@ -211,7 +237,7 @@ public class Simulation {
 	 * @return
 	 */
 	public boolean isSimulationErfolgreich() {
-		return rundenAnzahl <= runden.size();
+		return !isSimulationFehlgeschlagen() && rundenAnzahl < runden.size();
 	}
 
 	/**
@@ -220,15 +246,14 @@ public class Simulation {
 	 * @return
 	 */
 	public boolean isSimulationFehlgeschlagen() {
-		kenngroessen.values()
-				.forEach(k -> System.out.println(k.getKenngroesseTyp().toString() + " AKTUELL: " + k.getAktuellerWert()
-						+ " ENDE: " + k.getWertebereichEnde() + " ANFANG: " + k.getWertebereichAnfang()));
 		return kenngroessen.values().stream().anyMatch(k -> k.getAktuellerWert() > k.getWertebereichEnde()
 				|| k.getAktuellerWert() < k.getWertebereichAnfang());
 	}
 
 	/**
 	 * Aktuallsieirt alle in dieser Simulation gespeicherten Kenngroessen
+	 * 
+	 * @return
 	 */
 	private void kenngroessenAktuallisieren() {
 		kenngroessen.get(KenngroesseTyp.Wirtschaftsleistung).aktuallisiereWert(1);
@@ -259,43 +284,24 @@ public class Simulation {
 		return wertDerKenngroesse;
 	}
 
+	// Getter
 	public int getRundenAnzahl() {
 		return rundenAnzahl;
-	}
-
-	public void setRundenAnzahl(int rundenAnzahl) {
-		this.rundenAnzahl = rundenAnzahl;
 	}
 
 	public boolean isMitZufallsereignissen() {
 		return mitZufallsereignissen;
 	}
 
-	public void setMitZufallsereignissen(boolean mitZufallsereignissen) {
-		this.mitZufallsereignissen = mitZufallsereignissen;
-	}
-
 	public Map<KenngroesseTyp, Kenngroesse> getKenngroessen() {
 		return kenngroessen;
-	}
-
-	public void setKenngroessen(Map<KenngroesseTyp, Kenngroesse> kenngroessen) {
-		this.kenngroessen = kenngroessen;
 	}
 
 	public List<Runde> getRunden() {
 		return runden;
 	}
 
-	public void setRunden(List<Runde> runden) {
-		this.runden = runden;
-	}
-
 	public List<Zufallsereignis> getZufallsereignisse() {
 		return zufallsereignisse;
-	}
-
-	public void setZufallsereignisse(List<Zufallsereignis> zufallsereignisse) {
-		this.zufallsereignisse = zufallsereignisse;
 	}
 }

@@ -4,14 +4,15 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
@@ -19,7 +20,15 @@ import simulation.Setup;
 import simulation.Simulation;
 import simulation.Zufallsereignis;
 
-public class SimulationsFenster {
+/**
+ * Diese Klasse stellt die Oberfläche zur verfügung und bietet so eine
+ * Schnittstelle zwischen dem Benutzer und der Simulation.
+ * 
+ * @author Flo
+ * @author Fynn
+ * @author Jan
+ */
+public class SimulationOberflaeche {
 	private JFrame frame = new JFrame();
 	private Simulation simulation;
 
@@ -31,33 +40,43 @@ public class SimulationsFenster {
 	private JLabel runde;
 	private JFileChooser fileChooser = new JFileChooser();
 
-	public SimulationsFenster() {
-		// Fenster erstellen
-	}
-
+	/**
+	 * Startet die Simulation, indem die Einflussfaktoren und Simulationsdatei
+	 * eingelesen werden und die Daten der erste Runde gesetzt werden.
+	 */
 	public void start() {
 		// Filechooser Einflussfaktoren
+		JOptionPane.showMessageDialog(null, "Wählen Sie die Einflussfaktoren Datei aus.");
+		fileChooser.setFileFilter(new FileNameExtensionFilter("CSV FILES", "csv"));
 		fileChooser.showOpenDialog(null);
 		String einflussfaktorenPath = fileChooser.getSelectedFile().getPath();
 		Setup.einflussfaktorenPath = einflussfaktorenPath;
 
 		// Filechooser Semulationsdatei
+		JOptionPane.showMessageDialog(null, "Wählen Sie die Simulationsdatei aus.");
+		fileChooser.setFileFilter(new FileNameExtensionFilter("SIM FILES", "sim"));
 		fileChooser.showOpenDialog(null);
 		String simulationsdateiPath = fileChooser.getSelectedFile().getPath();
 
 		// Simulation erstellen
 		simulation = new Simulation(simulationsdateiPath);
 
-		neueRundeSetzen();
-	}
-
-	private void neueRundeSetzen() {
-		// Alle Elemente löschen
+		// Frame erzeugen
 		frame = new JFrame();
 		frame.setSize(1500, 800);
 		frame.setResizable(false);
 		frame.setLayout(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		neueRundeSetzen();
+		frame.setVisible(true);
+	}
+
+	/**
+	 * Setzt die Daten der Aktuellen Runde aus der Simulation
+	 */
+	private void neueRundeSetzen() {
+		// Alle Elemente löschen
 		frame.getContentPane().removeAll();
 
 		// Anzeige der aktuellen Runde
@@ -70,14 +89,14 @@ public class SimulationsFenster {
 		anpassungSetzen();
 
 		if (simulation.isSimulationErfolgreich()) {
-			frame.setVisible(true);
+			frame.repaint();
 			// Simulation Erfolgreich
 			JOptionPane.showMessageDialog(null, "Simulation Erfolgreich!");
 			simulationsdateiErstellen();
 			return;
 		} else if (simulation.isSimulationFehlgeschlagen()) {
 			// Simulation Fehlgeschlagen
-			frame.setVisible(true);
+			frame.repaint();
 			JOptionPane.showMessageDialog(null, "Simulation fehlgeschlagen...");
 			simulationsdateiErstellen();
 			return;
@@ -109,17 +128,20 @@ public class SimulationsFenster {
 		btn.setBounds(1200, 300, 200, 100);
 		frame.add(btn);
 
-		// Frame anzeigen
-		frame.setVisible(true);
+		// Frame aktuallisieren
+		frame.repaint();
 	}
 
+	/**
+	 * Setzt die Daten der Aktuellen Werte.
+	 */
 	private void aktuellenStandSetzen() {
 		// Überschriften setzen
 		JLabel ueberschrift = new JLabel("Aktueller Stand:");
 		ueberschrift.setBounds(100, 50, 250, 50);
 		ueberschrift.setFont(new Font(ueberschrift.getFont().getFontName(), Font.BOLD, 25));
 		Font font = ueberschrift.getFont();
-		Map attributes = font.getAttributes();
+		Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
 		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 		ueberschrift.setFont(font.deriveFont(attributes));
 		frame.add(ueberschrift);
@@ -135,13 +157,17 @@ public class SimulationsFenster {
 		}
 	}
 
+	/**
+	 * Setzt die Elemente um die Werte der Staatsvermögen, Wirtschaftsleistung,
+	 * Modernisierungsgrad, Lebensqualität und Bildung zu ändern.
+	 */
 	private void anpassungSetzen() {
 		// Überschrift
 		JLabel ueberschrift = new JLabel("Neue Werte:");
 		ueberschrift.setBounds(600, 50, 250, 50);
 		ueberschrift.setFont(new Font(ueberschrift.getFont().getFontName(), Font.BOLD, 25));
 		Font font = ueberschrift.getFont();
-		Map attributes = font.getAttributes();
+		Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
 		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 		ueberschrift.setFont(font.deriveFont(attributes));
 		frame.add(ueberschrift);
@@ -252,6 +278,10 @@ public class SimulationsFenster {
 		frame.add(bildungHinzufuegen);
 	}
 
+	/**
+	 * Startet eine Abfrage, ob eine Simulationsdatei erstellt werden soll und
+	 * erstellt diese ggfs.
+	 */
 	private void simulationsdateiErstellen() {
 		int dateiErstellen = JOptionPane.showOptionDialog(null,
 				"Möchten Sie eine Ergebnisdatei von der Simulation erstellen?", "", JOptionPane.YES_NO_OPTION,
@@ -259,11 +289,19 @@ public class SimulationsFenster {
 
 		if (dateiErstellen == 0) {
 			// Die Datei soll erstellt werden
+			fileChooser.setFileFilter(new FileNameExtensionFilter("RES FILES", "res"));
 			fileChooser.showOpenDialog(null);
-			simulation.simulationsionsdateiErstellen(fileChooser.getSelectedFile().getPath());
-		} else if (dateiErstellen == 1) {
-			// Die Datei soll nicht erstellt werden
-
+			simulation.simulationsionsinfosErstellen(fileChooser.getSelectedFile().getPath());
 		}
+	}
+
+	/**
+	 * Startet die Oberfläche
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		SimulationOberflaeche sf = new SimulationOberflaeche();
+		sf.start();
 	}
 }

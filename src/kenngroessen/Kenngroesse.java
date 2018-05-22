@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Repräsentiert eine beliebige Kenngröße.
+ * Diese Klasse repräsentiert eine beliebige Kenngröße.
  * 
  * @author Flo
  * @author Fynn
@@ -30,7 +30,12 @@ public class Kenngroesse {
 	}
 
 	/**
-	 * Aktuallisiert 'aktuellerWert' aufgrund der kenngroessen mit Einfluss.
+	 * Aktuallisiert 'aktuellerWert' aufgrund der kenngroessen mit Einfluss. Der
+	 * Übergebene Wert bestimmt den multiplikationsfaktor, falls einer der beiden
+	 * Einflussfaktoren 'Bevoelkerungswachstum auf Bevoelkerungsgroesse' oder
+	 * 'Bevoelkerungsgroesse auf Staatsvermoegen' mit einfliesst.
+	 * 
+	 * @param multiplikatorFaktor
 	 */
 	public void aktuallisiereWert(int multiplikatorFaktor) {
 		if (aktuellerWert > wertebereichEnde || aktuellerWert < wertebereichAnfang) {
@@ -58,18 +63,17 @@ public class Kenngroesse {
 						|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
 					faktor = k.getAktuellerWert();
 				} else {
-					System.out.println(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString() + ".. "
-							+ k.getAktuellerWert());
 					faktor = einflussfaktoren
 							.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
 							.get(k.getAktuellerWert());
 
-					if (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
-							|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
+					if ((k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstum)
+							&& this.kenngroesseTyp.equals(KenngroesseTyp.Bevoelkerungsgroesse))
+							|| k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungsgroesse)
+									&& this.kenngroesseTyp.equals(KenngroesseTyp.Staatsvermoegen)) {
 						faktor *= multiplikatorFaktor;
 					}
 				}
-
 				aktuellerWert += faktor;
 			}
 		}
@@ -80,32 +84,16 @@ public class Kenngroesse {
 		return kenngroesseTyp;
 	}
 
-	public void setKenngroesseTyp(KenngroesseTyp kenngroesseTyp) {
-		this.kenngroesseTyp = kenngroesseTyp;
-	}
-
 	public List<Kenngroesse> getKenngroessenMitEinfluss() {
 		return kenngroessenMitEinfluss;
-	}
-
-	public void setKenngroessenMitEinfluss(List<Kenngroesse> kenngroessenMitEinfluss) {
-		this.kenngroessenMitEinfluss = kenngroessenMitEinfluss;
 	}
 
 	public int getWertebereichAnfang() {
 		return wertebereichAnfang;
 	}
 
-	public void setWertebereichAnfang(int wertebereichAnfang) {
-		this.wertebereichAnfang = wertebereichAnfang;
-	}
-
 	public int getWertebereichEnde() {
 		return wertebereichEnde;
-	}
-
-	public void setWertebereichEnde(int wertebereichEnde) {
-		this.wertebereichEnde = wertebereichEnde;
 	}
 
 	public int getAktuellerWert() {
@@ -114,13 +102,5 @@ public class Kenngroesse {
 
 	public void setAktuellerWert(int aktuellerWert) {
 		this.aktuellerWert = aktuellerWert;
-	}
-
-	public Map<String, Map<Integer, Integer>> getEinflussfaktoren() {
-		return einflussfaktoren;
-	}
-
-	public void setEinflussfaktoren(Map<String, Map<Integer, Integer>> einflussfaktoren) {
-		this.einflussfaktoren = einflussfaktoren;
 	}
 }
