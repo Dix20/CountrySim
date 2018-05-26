@@ -83,10 +83,6 @@ public class Kenngroesse {
 				|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
 			faktor = k.getAktuellerWert();
 		} else {
-			System.out.println(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString());
-			System.out.println("EINFLUSSFAKTOR: "
-					+ einflussfaktoren.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
-							.get(k.getAktuellerWert()));
 			faktor = einflussfaktoren.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
 					.get(k.getAktuellerWert());
 
@@ -94,15 +90,9 @@ public class Kenngroesse {
 					&& this.kenngroesseTyp.equals(KenngroesseTyp.Bevoelkerungsgroesse))
 					|| (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungsgroesse)
 							&& this.kenngroesseTyp.equals(KenngroesseTyp.Staatsvermoegen))) {
-				System.out.println("___________________");
-				System.out.println(k.getKenngroesseTyp());
-				System.out.println(this.getKenngroesseTyp());
-				System.out.println("MULTIPLIKATOR: " + multiplikatorFaktor);
-				System.out.println("FAKTOR VORHER: " + faktor);
 				faktor *= multiplikatorFaktor;
 			}
 		}
-		System.out.println("FAKTOR: " + faktor);
 		return faktor;
 	}
 

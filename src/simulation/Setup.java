@@ -12,8 +12,7 @@ import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
 
 /**
- * Diese Klasse stellt Methoden zur verfügung um
- * bestimmte Objekte zu erhalten.
+ * Diese Klasse stellt Methoden zur verfügung um bestimmte Objekte zu erhalten.
  * 
  * @author Flo
  * @author Fynn
@@ -71,7 +70,7 @@ public class Setup {
 		// Abhängige Kenngrößen setzen
 		// Bevölkerungsgröße
 		bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstum);
-//		bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstumsfaktor);
+		// bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstumsfaktor);
 
 		// Bevölkerungswachstum
 		bevoelkerungswachstum.getKenngroessenMitEinfluss().add(bildung);
@@ -109,7 +108,7 @@ public class Setup {
 		// Staatsvermögen
 		staatsvermoegen.getKenngroessenMitEinfluss().add(bevoelkerungsgroesse);
 		staatsvermoegen.getKenngroessenMitEinfluss().add(wirtschaftsleistung);
-//		staatsvermoegen.getKenngroessenMitEinfluss().add(versorgungslage);
+		// staatsvermoegen.getKenngroessenMitEinfluss().add(versorgungslage);
 		staatsvermoegen.getKenngroessenMitEinfluss().add(politischeStabilitaet);
 		staatsvermoegen.getKenngroessenMitEinfluss().add(lebensqualitaet);
 
@@ -195,12 +194,43 @@ public class Setup {
 		List<Zufallsereignis> zufallsereignisse = new ArrayList<>();
 
 		// Zufallsereignisse der Liste hinzufügen
-		zufallsereignisse
-				.add(new Zufallsereignis("Bei einem Erdbeben kommen zahlreiche Menschen um. Bevölkerungsgröße -2", -2,
-						KenngroesseTyp.Bevoelkerungsgroesse));
+		zufallsereignisse.add(new Zufallsereignis(
+				"Tektonische Plattenaktivitäten verursachen einen Tsunami. Die Küstenregion leidet besonders unter den Folgen der Naturkatastrophe. Bevölkerungsgröße -2",
+				-2, KenngroesseTyp.Bevoelkerungsgroesse));
 
-		zufallsereignisse
-				.add(new Zufallsereignis("HSV steigt ab... Lebensqualitaet -2", -2, KenngroesseTyp.Lebensqualitaet));
+		zufallsereignisse.add(new Zufallsereignis(
+				"Eine Gewerkschaft setzt ihre Forderungen in den Verhandlungen durch. Sie erzielt eine einmalige Bonuszahlung für Arbeitnehmer. Lebensqualität +2",
+				2, KenngroesseTyp.Lebensqualitaet));
+
+		zufallsereignisse.add(new Zufallsereignis(
+				"Aufgrund eines Krieges sind viele Menschen gezwungen ihren Heimatort aufzugeben. Unser Land bietet ihnen Asyl. Bevölkerungsgröße +2",
+				2, KenngroesseTyp.Bevoelkerungsgroesse));
+
+		zufallsereignisse.add(new Zufallsereignis(
+				"Aufgrund hoher Zinsen leistet sich nur noch wenige ein Eigenheim. Immer mehr Einwohner steigen auf Mietobjekte um und treiben den Preis in die Höhe. Lebensqualität -2",
+				-2, KenngroesseTyp.Lebensqualitaet));
+
+		zufallsereignisse.add(
+				new Zufallsereignis("Ein neues Hotel wird eröffnet. Die Tourisbranche boomt. Wirtschaftsleistung +1", 1,
+						KenngroesseTyp.Wirtschaftsleistung));
+
+		zufallsereignisse.add(new Zufallsereignis(
+				"Die Regierung fördert den Bau von WIndpark-Anlagen. Ein neuer Windpark wird errichtet. Umweltverschmutzung -1",
+				-1, KenngroesseTyp.Umweltverschmutzung));
+
+		zufallsereignisse.add(new Zufallsereignis(
+				"Das amtierende Staatsoberhaupt stirbt bei einem Anschlag. Politische Stabilität -3", -3,
+				KenngroesseTyp.PolitischeStabilitaet));
+
+		zufallsereignisse.add(new Zufallsereignis("Eine neue Bildungsreform wird verabschiedet. Bildung +1", 1,
+				KenngroesseTyp.Bildung));
+
+		zufallsereignisse.add(new Zufallsereignis("Eine neue Bildungsreform wird verabschiedet. Bildung -1", -1,
+				KenngroesseTyp.Bildung));
+
+		zufallsereignisse.add(
+				new Zufallsereignis("Erweiterung des öffentlichen Zugangs zu kostenlosen WLAN. Modernisierungsgrad +2",
+						2, KenngroesseTyp.Modernisierungsgrad));
 
 		return zufallsereignisse;
 	}
