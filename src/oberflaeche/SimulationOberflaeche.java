@@ -47,7 +47,7 @@ public class SimulationOberflaeche {
 	public void start() {
 		// Filechooser Einflussfaktoren
 		JOptionPane.showMessageDialog(null, "Wählen Sie die Einflussfaktoren Datei aus.");
-		
+
 		fileChooser.setFileFilter(new FileNameExtensionFilter("CSV FILES", "csv"));
 		fileChooser.showOpenDialog(null);
 		String einflussfaktorenPath = fileChooser.getSelectedFile().getPath();
@@ -92,7 +92,8 @@ public class SimulationOberflaeche {
 		if (simulation.isSimulationErfolgreich()) {
 			frame.repaint();
 			// Simulation Erfolgreich
-			JOptionPane.showMessageDialog(null, "Simulation Erfolgreich!");
+			JOptionPane.showMessageDialog(null,
+					"Simulation Erfolgreich!\nSimulationserfolg: " + simulation.getSimulationserfolg());
 			simulationsdateiErstellen();
 			return;
 		} else if (simulation.isSimulationFehlgeschlagen()) {

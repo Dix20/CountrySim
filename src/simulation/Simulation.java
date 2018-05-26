@@ -201,16 +201,20 @@ public class Simulation {
 
 		// Überschrift, welche das Ergebnis der Simulation beschreibt.
 		if (isSimulationErfolgreich()) {
-			text += "Simulation war Erfolgreich\n";
+			text += "Simulation war Erfolgreich\n\n";
 		} else if (isSimulationFehlgeschlagen()) {
-			text += "Simulation ist Fehlgeschlagen...\n";
+			text += "Simulation ist Fehlgeschlagen...\n\n";
 		} else {
-			text += "Simulation wurde noch nicht beendet.\n";
+			text += "Simulation wurde noch nicht beendet.\n\n";
 		}
 
 		// Beschreibung jeder Runde
 		for (Runde r : runden) {
 			text += r.getInfos() + "\n";
+		}
+
+		if (isSimulationErfolgreich()) {
+			text += "Simulationserfolg: " + getSimulationserfolg();
 		}
 
 		// Datei erstellen und speichern
@@ -229,6 +233,16 @@ public class Simulation {
 			} catch (Exception e) {
 			}
 		}
+	}
+
+	/**
+	 * Gibt den aktuellen Simulationserfolgwert zurück.
+	 * @return
+	 */
+	public int getSimulationserfolg() {
+		return ((3 * kenngroessen.get(KenngroesseTyp.Lebensqualitaet).getAktuellerWert())
+				+ (kenngroessen.get(KenngroesseTyp.PolitischeStabilitaet).getAktuellerWert())
+				+ (kenngroessen.get(KenngroesseTyp.Staatsvermoegen).getAktuellerWert()));
 	}
 
 	/**
