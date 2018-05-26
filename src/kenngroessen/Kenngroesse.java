@@ -44,6 +44,8 @@ public class Kenngroesse {
 			return;
 		}
 
+		Kenngroesse rueckkopplung = null;
+
 		if (this.kenngroesseTyp.equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
 				|| this.kenngroesseTyp.equals(KenngroesseTyp.Versorgungslage)) {
 			// Setzt die Werte aus den Einflussfaktoren direkt.
@@ -58,25 +60,50 @@ public class Kenngroesse {
 					return;
 				}
 
-				int faktor = 0;
-				if (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
-						|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
-					faktor = k.getAktuellerWert();
-				} else {
-					faktor = einflussfaktoren
-							.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
-							.get(k.getAktuellerWert());
-
-					if ((k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstum)
-							&& this.kenngroesseTyp.equals(KenngroesseTyp.Bevoelkerungsgroesse))
-							|| k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungsgroesse)
-									&& this.kenngroesseTyp.equals(KenngroesseTyp.Staatsvermoegen)) {
-						faktor *= multiplikatorFaktor;
-					}
+				if (k.getKenngroesseTyp().equals(this.kenngroesseTyp)) {
+					rueckkopplung = k;
+					continue;
 				}
+
+				int faktor = getFaktorVon(k, multiplikatorFaktor);
+				aktuellerWert += faktor;
+			}
+
+			if (rueckkopplung != null) {
+				int faktor = getFaktorVon(rueckkopplung, multiplikatorFaktor);
 				aktuellerWert += faktor;
 			}
 		}
+	}
+
+	private int getFaktorVon(Kenngroesse k, int multiplikatorFaktor) {
+		int faktor = 0;
+
+		if (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstumsfaktor)
+				|| k.getKenngroesseTyp().equals(KenngroesseTyp.Versorgungslage)) {
+			faktor = k.getAktuellerWert();
+		} else {
+			System.out.println(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString());
+			System.out.println("EINFLUSSFAKTOR: "
+					+ einflussfaktoren.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
+							.get(k.getAktuellerWert()));
+			faktor = einflussfaktoren.get(k.getKenngroesseTyp().toString() + "auf" + this.kenngroesseTyp.toString())
+					.get(k.getAktuellerWert());
+
+			if ((k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungswachstum)
+					&& this.kenngroesseTyp.equals(KenngroesseTyp.Bevoelkerungsgroesse))
+					|| (k.getKenngroesseTyp().equals(KenngroesseTyp.Bevoelkerungsgroesse)
+							&& this.kenngroesseTyp.equals(KenngroesseTyp.Staatsvermoegen))) {
+				System.out.println("___________________");
+				System.out.println(k.getKenngroesseTyp());
+				System.out.println(this.getKenngroesseTyp());
+				System.out.println("MULTIPLIKATOR: " + multiplikatorFaktor);
+				System.out.println("FAKTOR VORHER: " + faktor);
+				faktor *= multiplikatorFaktor;
+			}
+		}
+		System.out.println("FAKTOR: " + faktor);
+		return faktor;
 	}
 
 	// Getter und Setter

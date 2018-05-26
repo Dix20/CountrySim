@@ -71,7 +71,7 @@ public class Setup {
 		// Abhängige Kenngrößen setzen
 		// Bevölkerungsgröße
 		bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstum);
-		bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstumsfaktor);
+//		bevoelkerungsgroesse.getKenngroessenMitEinfluss().add(bevoelkerungswachstumsfaktor);
 
 		// Bevölkerungswachstum
 		bevoelkerungswachstum.getKenngroessenMitEinfluss().add(bildung);
@@ -109,7 +109,7 @@ public class Setup {
 		// Staatsvermögen
 		staatsvermoegen.getKenngroessenMitEinfluss().add(bevoelkerungsgroesse);
 		staatsvermoegen.getKenngroessenMitEinfluss().add(wirtschaftsleistung);
-		staatsvermoegen.getKenngroessenMitEinfluss().add(versorgungslage);
+//		staatsvermoegen.getKenngroessenMitEinfluss().add(versorgungslage);
 		staatsvermoegen.getKenngroessenMitEinfluss().add(politischeStabilitaet);
 		staatsvermoegen.getKenngroessenMitEinfluss().add(lebensqualitaet);
 

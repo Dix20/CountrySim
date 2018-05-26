@@ -47,6 +47,7 @@ public class SimulationOberflaeche {
 	public void start() {
 		// Filechooser Einflussfaktoren
 		JOptionPane.showMessageDialog(null, "Wählen Sie die Einflussfaktoren Datei aus.");
+		
 		fileChooser.setFileFilter(new FileNameExtensionFilter("CSV FILES", "csv"));
 		fileChooser.showOpenDialog(null);
 		String einflussfaktorenPath = fileChooser.getSelectedFile().getPath();
