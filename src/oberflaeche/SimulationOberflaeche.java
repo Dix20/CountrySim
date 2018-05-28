@@ -14,8 +14,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
 import kenngroessen.Kenngroesse;
 import kenngroessen.KenngroesseTyp;
+import simulation.Runde;
 import simulation.Setup;
 import simulation.Simulation;
 import simulation.Zufallsereignis;
@@ -64,7 +72,7 @@ public class SimulationOberflaeche {
 
 		// Frame erzeugen
 		frame = new JFrame();
-		frame.setSize(1500, 800);
+		frame.setSize(1700, 800);
 		frame.setResizable(false);
 		frame.setLayout(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -85,6 +93,8 @@ public class SimulationOberflaeche {
 		runde.setBounds(5, 5, 200, 20);
 		frame.add(runde);
 
+		diagrammSetzen();
+
 		aktuellenStandSetzen();
 
 		anpassungSetzen();
@@ -104,34 +114,35 @@ public class SimulationOberflaeche {
 			return;
 		}
 
-		// nächste Runde Button
-		JButton btn = new JButton("Nächste Runde");
-		btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				simulation.neueRunde(Integer.parseInt(staatsvermoegen.getText().split(" ")[1]),
-						Integer.parseInt(wirtschaftsleistung.getText().split(" ")[1]),
-						Integer.parseInt(modernisierungsgrad.getText().split(" ")[1]),
-						Integer.parseInt(lebensqualitaet.getText().split(" ")[1]),
-						Integer.parseInt(bildung.getText().split(" ")[1]));
-				// Dialog mit den Zufallsereignissen anzeigen:
-				if (simulation.isMitZufallsereignissen()) {
-					String zufallsereignisseString = "Folgende Zufallsereignisse sind letzte Runde eingetreten:\n";
-					for (Zufallsereignis z : simulation.getRunden().get(simulation.getRunden().size() - 1)
-							.getZufallsereignisse()) {
-						zufallsereignisseString += z.getBeschreibung() + "\n";
-					}
-					JOptionPane.showMessageDialog(null, zufallsereignisseString);
-				}
-
-				// Fenster akuallisieren
-				neueRundeSetzen();
-			}
-		});
-		btn.setBounds(1200, 300, 200, 100);
-		frame.add(btn);
+		naechsteRundeButton();
 
 		// Frame aktuallisieren
 		frame.repaint();
+	}
+
+	/**
+	 * Setzt das Diagramm für die vergangenen Werte jeder bisherigen Runde.
+	 */
+	private void diagrammSetzen() {
+		// Dataset speichert die einzelnen Series
+		XYSeriesCollection dataset = new XYSeriesCollection();
+
+		// Erstellt für jede runde Serie, welche alle bisherigen Runden beinhaltet.
+		for (KenngroesseTyp k : simulation.getKenngroessen().keySet()) {
+			XYSeries series = new XYSeries(k.toString());
+			for (Runde r : simulation.getRunden()) {
+				series.add(r.getRunde(), r.getWertDerKenngroesse().get(k));
+			}
+			dataset.addSeries(series);			
+		}
+
+		// Fügt die Daten einem Chart hinzu.
+		JFreeChart chart = ChartFactory.createXYLineChart("Entwicklung Kenngrößen", "Runde", "Anzahl", dataset);
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setBounds(10, 150, 550, 500);
+
+		// Fügt das Panel, in welchem das Chart gespeichert ist, dem Frame hinzu.
+		frame.add(chartPanel);
 	}
 
 	/**
@@ -140,7 +151,7 @@ public class SimulationOberflaeche {
 	private void aktuellenStandSetzen() {
 		// Überschriften setzen
 		JLabel ueberschrift = new JLabel("Aktueller Stand:");
-		ueberschrift.setBounds(100, 50, 250, 50);
+		ueberschrift.setBounds(600, 50, 250, 50);
 		ueberschrift.setFont(new Font(ueberschrift.getFont().getFontName(), Font.BOLD, 25));
 		Font font = ueberschrift.getFont();
 		Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
@@ -152,7 +163,7 @@ public class SimulationOberflaeche {
 
 		for (Kenngroesse k : simulation.getKenngroessen().values()) {
 			JLabel l = new JLabel(k.getKenngroesseTyp().toString() + ": " + k.getAktuellerWert());
-			l.setBounds(100, hoehe, 400, 50);
+			l.setBounds(600, hoehe, 400, 50);
 			hoehe += 50;
 			l.setFont(new Font(l.getFont().getFontName(), Font.PLAIN, 15));
 			frame.add(l);
@@ -166,7 +177,7 @@ public class SimulationOberflaeche {
 	private void anpassungSetzen() {
 		// Überschrift
 		JLabel ueberschrift = new JLabel("Neue Werte:");
-		ueberschrift.setBounds(600, 50, 250, 50);
+		ueberschrift.setBounds(950, 50, 250, 50);
 		ueberschrift.setFont(new Font(ueberschrift.getFont().getFontName(), Font.BOLD, 25));
 		Font font = ueberschrift.getFont();
 		Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
@@ -179,14 +190,14 @@ public class SimulationOberflaeche {
 		staatsvermoegen = new JLabel("Staatsvermögen: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Staatsvermoegen).getAktuellerWert());
 		staatsvermoegen.setFont(new Font(staatsvermoegen.getFont().getFontName(), Font.PLAIN, 20));
-		staatsvermoegen.setBounds(600, 100, 250, 50);
+		staatsvermoegen.setBounds(950, 100, 250, 50);
 		// Wirtschaftsleistung
 		wirtschaftsleistung = new JLabel("Wirtschaftsleistung: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Wirtschaftsleistung).getAktuellerWert());
 		wirtschaftsleistung.setFont(new Font(wirtschaftsleistung.getFont().getFontName(), Font.PLAIN, 20));
-		wirtschaftsleistung.setBounds(600, 200, 250, 50);
+		wirtschaftsleistung.setBounds(950, 200, 250, 50);
 		JButton wirtschaftsleistungHinzufuegen = new JButton("+");
-		wirtschaftsleistungHinzufuegen.setBounds(875, 200, 50, 50);
+		wirtschaftsleistungHinzufuegen.setBounds(1225, 200, 50, 50);
 		wirtschaftsleistungHinzufuegen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (Integer.parseInt(staatsvermoegen.getText().split(" ")[1]) > 0
@@ -211,12 +222,12 @@ public class SimulationOberflaeche {
 				}
 			}
 		});
-		wirtschaftsleistungEntfernen.setBounds(925, 200, 50, 50);
+		wirtschaftsleistungEntfernen.setBounds(1275, 200, 50, 50);
 		// Modernisierungsgrad
 		modernisierungsgrad = new JLabel("Modernisierungsgrad: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Modernisierungsgrad).getAktuellerWert());
 		modernisierungsgrad.setFont(new Font(modernisierungsgrad.getFont().getFontName(), Font.PLAIN, 20));
-		modernisierungsgrad.setBounds(600, 300, 250, 50);
+		modernisierungsgrad.setBounds(950, 300, 250, 50);
 		JButton modernisierungsgradHinzufuegen = new JButton("+");
 		modernisierungsgradHinzufuegen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -230,12 +241,12 @@ public class SimulationOberflaeche {
 				}
 			}
 		});
-		modernisierungsgradHinzufuegen.setBounds(900, 300, 50, 50);
+		modernisierungsgradHinzufuegen.setBounds(1250, 300, 50, 50);
 		// Lebensqualität
 		lebensqualitaet = new JLabel("Lebensqualität: "
 				+ simulation.getKenngroessen().get(KenngroesseTyp.Lebensqualitaet).getAktuellerWert());
 		lebensqualitaet.setFont(new Font(lebensqualitaet.getFont().getFontName(), Font.PLAIN, 20));
-		lebensqualitaet.setBounds(600, 400, 250, 50);
+		lebensqualitaet.setBounds(950, 400, 250, 50);
 		JButton lebensqualitaetHinzufuegen = new JButton("+");
 		lebensqualitaetHinzufuegen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -249,11 +260,11 @@ public class SimulationOberflaeche {
 				}
 			}
 		});
-		lebensqualitaetHinzufuegen.setBounds(900, 400, 50, 50);
+		lebensqualitaetHinzufuegen.setBounds(1250, 400, 50, 50);
 		// Bildung
 		bildung = new JLabel("Bildung: " + simulation.getKenngroessen().get(KenngroesseTyp.Bildung).getAktuellerWert());
 		bildung.setFont(new Font(bildung.getFont().getFontName(), Font.PLAIN, 20));
-		bildung.setBounds(600, 500, 250, 50);
+		bildung.setBounds(950, 500, 250, 50);
 		JButton bildungHinzufuegen = new JButton("+");
 		bildungHinzufuegen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -266,7 +277,7 @@ public class SimulationOberflaeche {
 				}
 			}
 		});
-		bildungHinzufuegen.setBounds(900, 500, 50, 50);
+		bildungHinzufuegen.setBounds(1250, 500, 50, 50);
 
 		frame.add(staatsvermoegen);
 		frame.add(wirtschaftsleistung);
@@ -278,6 +289,37 @@ public class SimulationOberflaeche {
 		frame.add(lebensqualitaetHinzufuegen);
 		frame.add(bildung);
 		frame.add(bildungHinzufuegen);
+	}
+
+	/**
+	 * Erstellt den 'nächste Runde' Button.
+	 */
+	private void naechsteRundeButton() {
+		// nächste Runde Button
+		JButton btn = new JButton("Nächste Runde");
+		btn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				simulation.neueRunde(Integer.parseInt(staatsvermoegen.getText().split(" ")[1]),
+						Integer.parseInt(wirtschaftsleistung.getText().split(" ")[1]),
+						Integer.parseInt(modernisierungsgrad.getText().split(" ")[1]),
+						Integer.parseInt(lebensqualitaet.getText().split(" ")[1]),
+						Integer.parseInt(bildung.getText().split(" ")[1]));
+				// Dialog mit den Zufallsereignissen anzeigen:
+				if (simulation.isMitZufallsereignissen()) {
+					String zufallsereignisseString = "Folgende Zufallsereignisse sind letzte Runde eingetreten:\n";
+					for (Zufallsereignis z : simulation.getRunden().get(simulation.getRunden().size() - 1)
+							.getZufallsereignisse()) {
+						zufallsereignisseString += z.getBeschreibung() + "\n";
+					}
+					JOptionPane.showMessageDialog(null, zufallsereignisseString);
+				}
+
+				// Fenster akuallisieren
+				neueRundeSetzen();
+			}
+		});
+		btn.setBounds(1450, 300, 200, 100);
+		frame.add(btn);
 	}
 
 	/**
